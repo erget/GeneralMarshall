@@ -98,8 +98,8 @@ class XML(object):
         to the user are synchronized with the internally stored XML elements
         """
 
-        err_str = ("{} instance has no attribute "
-                   "'{}'".format(self.__class__.__name__, key))
+        _attribute_error_string = ("{} instance has no attribute "
+                              "'{}'".format(self.__class__.__name__, key))
 
         # If key is in field hierarchy, get it or create it
         if key in self._tag_hierarchy:
@@ -114,7 +114,7 @@ class XML(object):
             attribute = parent_tag.get(key)
             return attribute
 
-        raise AttributeError(err_str)
+        raise AttributeError(_attribute_error_string)
 
     def __setattr__(self, name, value):
         """
@@ -173,45 +173,24 @@ class XML(object):
         else:
             self.__dict__[name] = value
 
-    def _get_or_create_tag(self, tag_name):
+    def _locate_in_hierarchy(self, tag_name):
         """
-        Get or create an tag.
+        Given a tag, return its parent and the tag's XML name.
 
-        Check if parent exists. If needed, the call method recursively until
-        all parent elements are created. The requested element is
-        created, if necessary, and then returned.
+        Nonexistent parents are created recursively.
 
-        @param tag_name: The name of the element
-        @param type: String
+        @param tag_name: The tag's code identifier.
+        @return: parent tag, tag's XML name
+        @rtype: XML tag, string
         """
-        def get_or_create_field_tag(tag_name, elements):
-            """
-            Get or create a field tag.
-
-            Scan elements and find any fields.
-            If fields are found, check names to see if they match the queried
-            tag.
-
-            @param tag_name: Name of tag to be returned
-            @param elements: Children of parent element
-            @return: The correct field tag
-            """
-            logging.info("Element is a field, special case.")
-            element = None
-            field_elements = [x for x in elements if x.tag == "field"]
-            logging.info("Found following field elements: "
-                         "{}".format(field_elements))
-            for tag in field_elements:
-                # Check if tag has right name and if yes, return it.
-                logging.info("Searching found elements "
-                             "for {}.".format(tag_name))
-                if tag.get("name") == self._field_tag_attribute_map[tag_name]:
-                    element = tag
-            logging.info("Returning {}.".format(element))
-            return element
-
+        # Does element exist in hierarchy?
+        try:
+            parent_name = self._tag_hierarchy[tag_name][0]
+        except KeyError:
+            _attribute_error_string = ("{} instance has no attribute "
+                              "'{}'".format(self.__class__.__name__, tag_name))
+            raise AttributeError(_attribute_error_string)
         # Does parent exist?
-        parent_name = self._tag_hierarchy[tag_name][0]
         try:
             logging.info("Looking for {}'s parent.".format(tag_name))
             parent = self.__dict__[parent_name]
@@ -222,14 +201,24 @@ class XML(object):
             parent = self.__dict__[parent_name]
         # Check if element exists
         child_name = self._tag_hierarchy[tag_name][1]
-        logging.info("Parent {} exists. "
-                     "{}'s XML name is {}.".format(parent,
-                                                   tag_name,
-                                                   child_name))
+        logging.info("Parent {} exists. {}'s XML name is {}.".
+                     format(parent, tag_name, child_name))
+        return parent, child_name
+
+    def _get_or_create_tag(self, tag_name):
+        """
+        Get or create a tag.
+
+        Check if parent exists. If needed, the call method recursively until
+        all parent elements are created. The requested element is
+        created, if necessary, and then returned.
+
+        @param tag_name: The name of the element
+        @param type: String
+        """
+        parent, child_name = self._locate_in_hierarchy(tag_name)
         elements = parent.getchildren()
         element = None
-        if child_name == "field":
-            element = get_or_create_field_tag(tag_name, elements)
 
         # If children are found and element child element is not found field
         if elements and child_name != "field":
