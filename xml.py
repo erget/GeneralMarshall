@@ -181,7 +181,7 @@ class XML:
         return "\n".join(lines)
 
     def __repr__(self):
-        return 'SkyQuery("{}")'.format(self.source_file)
+        return 'XML("{}")'.format(self.source_file)
 
     def __getattr__(self, key):
         """
