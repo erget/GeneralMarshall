@@ -203,23 +203,29 @@ class XML:
 
         err_str = "SkyQuery instance has no attribute '{}'".format(key)
 
+        if key == "reference_date":
+            return self.get_or_create_tag("reference_date_value").text
+
         # If key is field tag, set the name
-        if key in self.field_tag_identifiers:
+        if key in self._field_tag_identifiers:
             tag = self.get_or_create_tag(key)
-            field_name = self.field_tag_identifiers[key][1]
+            field_name = self._field_tag_identifiers[key][1]
             tag.set("name", field_name)
             return tag
 
         # If key is in field hierarchy, get it or create it
-        if key in self.tag_hierarchy:
+        if key in self._tag_hierarchy:
             return self.get_or_create_tag(key)
 
-        if key == "database":
-            return self.read_element.get("database")
-#         elif key == "reference_date":
-#             return self.get_or_create_tag("reference_date_value").text
-        elif key == "category":
-            return self.select_element.get("category")
+        # If key is attribute, get attribute value
+        if key in self._unique_tag_attributes:
+            tag_name = self._unique_tag_attributes[key][0]
+            parent_tag = self.get_or_create_tag(tag_name)
+            logging.info("{} is a tag attribute that belongs to tag {}"
+                         ".".format(key, parent_tag))
+            attribute = parent_tag.get(key)
+            return attribute
+
         elif key == "field_tag_names":
             return self.select_element.findall("field")
         elif key == "field":
@@ -230,8 +236,6 @@ class XML:
             return find_field_element_text("FORECAST_TIME")
         elif key == "station_number":
             return find_field_element_text("STATION_NUMBER")
-        elif key == "file":
-            return self.file_element.get("name")
         else:
             raise AttributeError(err_str)
 
@@ -292,7 +296,7 @@ class XML:
 #             set_field_element_text(self.field_tag_names[name], value)
 
         if name == "reference_date":
-            self.reference_date.text = value
+            self.reference_date_value.text = value
         else:
             self.__dict__[name] = value
 
