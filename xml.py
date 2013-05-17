@@ -189,18 +189,6 @@ class XML:
         to the user are synchronized with the internally stored XML elements
         """
 
-        def find_field_element_text(name):
-            """Finds text of field element
-
-            @param name: Name of field element to find text of
-            @return: Element's text
-            @rtype: String
-            """
-            try:
-                return self.find_field_tag(name).getchildren()[0].text
-            except AttributeError:
-                return ""
-
         err_str = "SkyQuery instance has no attribute '{}'".format(key)
 
         if key == "reference_date":
@@ -228,16 +216,17 @@ class XML:
 
         elif key == "field_tag_names":
             return self.select_element.findall("field")
-        elif key == "field":
-            return find_field_element_text("PARAMETER_SHORTNAME")
-        elif key == "ensemble_member":
-            return find_field_element_text("ENSEMBLE_MEMBER")
-        elif key == "forecast_time":
-            return find_field_element_text("FORECAST_TIME")
-        elif key == "station_number":
-            return find_field_element_text("STATION_NUMBER")
-        else:
-            raise AttributeError(err_str)
+
+        # If key refers to field attribute, return that tag's value text
+        if key in self._field_tag_names:
+            value_tag, attribute_text = self._field_tag_names[key]
+            logging.info("{} is a field tag attribute with attribute text "
+                         "{}. ".format(key, attribute_text))
+            logging.info("Its value is stored in tag "
+                         "{}.".format(value_tag))
+            return self.get_or_create_tag(value_tag).text
+
+        raise AttributeError(err_str)
 
 #==============================================================================
 # Setters
