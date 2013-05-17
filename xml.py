@@ -23,24 +23,24 @@ class XML:
     be set in subclasses.
 
     Fields:
-        namespace: The namespace the XML document should work in
-        root_name: The XML document's root tag
-        unique_tags: Unique tags that can occur in the document
-        unique_tag_attributes: Possible unique attributes that can be placed on
-                               tags with the tag that should contain them.
-                               Organized thusly:
-                                   {attribute_identifier:
-                                       (tag, xml_attribute_name)}
-        tag_hierarchy: A tag hierarchy organized as a dictionary. This is used
-                       to place tags when they are generated. It is also used
-                       to dynamically generate parent elements that may not
-                       exist when creating child elements.
-                       Organized thusly:
-                           {tag_identifier: (parent, xml_tagname)}
-                       Note:
-                       After describing the field tags, this dictionary is
-                       updated to contain the hierarchy of field tags, which
-                       are all children of the unique select tag.
+        _namespace: The namespace the XML document should work in
+        _root_name: The XML document's root tag
+        _unique_tags: Unique tags that can occur in the document
+        _unique_tag_attributes: Possible unique attributes that can be placed
+                                on tags with the tag that should contain them.
+                                Organized thusly:
+                                    {attribute_identifier:
+                                        (tag, xml_attribute_name)}
+        _tag_hierarchy: A tag hierarchy organized as a dictionary. This is used
+                        to place tags when they are generated. It is also used
+                        to dynamically generate parent elements that may not
+                        exist when creating child elements.
+                        Organized thusly:
+                            {tag_identifier: (parent, xml_tagname)}
+                        Note:
+                        After describing the field tags, this dictionary is
+                        updated to contain the hierarchy of field tags, which
+                        are all children of the unique select tag.
 
     Methods:
         get_or_create_tag
@@ -54,11 +54,11 @@ class XML:
         query
     """
 
-    namespace = None
-    root_name = None
-    unique_tags = None
-    unique_tag_attributes = None
-    tag_hierarchy = None
+    _namespace = None
+    _root_name = None
+    _unique_tags = None
+    _unique_tag_attributes = None
+    _tag_hierarchy = None
 
     def get_or_create_tag(self, tag_name):
         """
@@ -92,13 +92,13 @@ class XML:
                 # Check if tag has right name and if yes, return it.
                 logging.info("Searching found elements "
                              "for {}.".format(tag_name))
-                if tag.get("name") == self.field_tag_attribute_map[tag_name]:
+                if tag.get("name") == self._field_tag_attribute_map[tag_name]:
                     element = tag
             logging.info("Returning {}.".format(element))
             return element
 
         # Does parent exist?
-        parent_name = self.tag_hierarchy[tag_name][0]
+        parent_name = self._tag_hierarchy[tag_name][0]
         try:
             logging.info("Looking for {}'s parent.".format(tag_name))
             parent = self.__dict__[parent_name]
@@ -108,7 +108,7 @@ class XML:
             self.__dict__[parent_name] = self.get_or_create_tag(parent_name)
             parent = self.__dict__[parent_name]
         # Check if element exists
-        child_name = self.tag_hierarchy[tag_name][1]
+        child_name = self._tag_hierarchy[tag_name][1]
         logging.info("Parent {} exists. "
                      "{}'s XML name is {}.".format(parent,
                                                    tag_name,
@@ -140,12 +140,12 @@ class XML:
             return element
 
         # Otherwise create it
-        element_name = self.tag_hierarchy[tag_name][1]
+        element_name = self._tag_hierarchy[tag_name][1]
         logging.info("Creating {} as {}.".format(tag_name, element_name))
         tag = etree.SubElement(parent, child_name)
         # If it's a field element, set its name
         if child_name == "field":
-            tag.set("name", self.field_tag_attribute_map[tag_name])
+            tag.set("name", self._field_tag_attribute_map[tag_name])
         return tag
 
 #==============================================================================
@@ -160,8 +160,8 @@ class XML:
             self.root = self.tree.getroot()
         else:
             self.source_file = ""
-            self.root = etree.Element(self.root_name,
-                                      nsmap={None: self.namespace})
+            self.root = etree.Element(self._root_name,
+                                      nsmap={None: self._namespace})
             self.tree = etree.ElementTree(self.root)
             self.reference_date = ""
         self.ns = "{" + self.root.nsmap[None] + "}"
@@ -269,18 +269,18 @@ class XML:
                 set_field_element_text(name, value)
 
         # name should be a tag attribute
-        if name in self.unique_tag_attributes:
-            tag_name = self.unique_tag_attributes[name][0]
+        if name in self._unique_tag_attributes:
+            tag_name = self._unique_tag_attributes[name][0]
             logging.info("{} is an attribute of {} tag.".format(name,
                                                                 tag_name))
             tag = self.get_or_create_tag(tag_name)
-            tag.set(self.unique_tag_attributes[name][1], value)
+            tag.set(self._unique_tag_attributes[name][1], value)
 
         # This is setting the field's value, rather than setting the value of
         # the value tag beneath the field.
         # Name is a field tag
-        if name in self.field_tag_names:
-            value_tag = self.field_tag_names[name][0]
+        if name in self._field_tag_names:
+            value_tag = self._field_tag_names[name][0]
             logging.info("{} is a field tag with tag name "
                          "{}.".format(name,
                                       value_tag))
@@ -356,5 +356,5 @@ class XML:
 
         os.system("echo '{}' | sky".format(str(self)))
 
-
+# Show log info messages if desired
 logging.basicConfig(format="%(message)s", level=logging.INFO)
