@@ -43,15 +43,16 @@ class XML:
                         are all children of the unique select tag.
 
     Methods:
-        get_or_create_tag
-        __init__
-        __str__
-        __repr__
-        __getattr__
-        __setattr__
-        generate_output_name
-        export
-        query
+        __init__: Either read a given XML file or create a root XML tag and
+                  store it internally
+        __str__: Use etree's tostring() method to convert the object's internal
+                 data into a prettily printed standalone XML file with XML
+                 declaration and character encoding
+        __repr__: Return initialization string
+        __getattr__: Overridden to force interaction with XML tree
+        __setattr__: Overridden to force interaction with XML tree
+        _get_or_create_tag: Return a tag, creating it if needed.
+        export: Export XML query as file
     """
 
     _namespace = None
