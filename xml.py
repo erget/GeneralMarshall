@@ -3,12 +3,12 @@ Created on May 17, 2013
 @author: Daniel Lee, DWD
 '''
 
+import logging
+import os
 try:
     from lxml import etree
 except ImportError:
     import xml.etree.ElementTree as etree
-import os
-import logging
 
 
 class XML:
@@ -289,39 +289,6 @@ class XML:
         else:
             self.__dict__[name] = value
 
-#==============================================================================
-# Object methods
-#==============================================================================
-
-    def generate_output_name(self):
-        """
-        Generate output names from the data source, fields queried and
-        reference date.
-
-        BUFR names are generated as follows:
-        YYYYMMDDHH/station_number
-
-        GRIB names are generated as follows:
-        YYYYMMDDHH/m{ensemble_member}U/field/lfff{forecast_time}0000
-        """
-        ensemble_member = self.ensemble_member
-        forecast_time = self.forecast_time
-        if self.ensemble_member:
-            ensemble_member = "m{}U".format(ensemble_member.zfill(3))
-        if forecast_time:
-            forecast_time = "lfff{}0000".format(forecast_time.zfill(4))
-
-        output = os.path.join(self.reference_date,
-                              ensemble_member,
-                              self.field,
-                              forecast_time,
-                              self.station_number).rstrip("/")
-        return output
-
-#==============================================================================
-# Side effects
-#==============================================================================
-
     def export(self, path):
         """Writes query to XML file
 
@@ -335,19 +302,11 @@ class XML:
                 overwrite = raw_input(prompt)
                 overwrite = overwrite.lower()
             if overwrite == "n":
-                logging.info("Please enter a new file name.")
+                print("Please enter a new file name.")
                 return
 
         with open(path, "w") as output_file:
             output_file.write(str(self))
-
-    def query(self):
-        """Performs the query with SKY"""
-        output_folder = os.path.dirname(self.file)
-        if not os.path.isdir(output_folder):
-            os.makedirs(output_folder)
-
-        os.system("echo '{}' | sky".format(str(self)))
 
 # Show log info messages if desired
 logging.basicConfig(format="%(message)s", level=logging.INFO)
