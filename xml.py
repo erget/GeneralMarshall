@@ -11,7 +11,7 @@ except ImportError:
     import xml.etree.ElementTree as etree
 
 
-class XML:
+class XML(object):
     """
     An XML file container.
 
