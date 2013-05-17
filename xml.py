@@ -190,7 +190,8 @@ class XML(object):
         to the user are synchronized with the internally stored XML elements
         """
 
-        err_str = "SkyQuery instance has no attribute '{}'".format(key)
+        err_str = ("{} instance has no attribute "
+                   "'{}'".format(self.__class__.__name__, key))
 
         if key == "reference_date":
             return self._get_or_create_tag("reference_date_value").text
