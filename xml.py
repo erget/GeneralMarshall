@@ -193,16 +193,6 @@ class XML(object):
         err_str = ("{} instance has no attribute "
                    "'{}'".format(self.__class__.__name__, key))
 
-        if key == "reference_date":
-            return self._get_or_create_tag("reference_date_value").text
-
-        # If key is field tag, set the name
-        if key in self._field_tag_identifiers:
-            tag = self._get_or_create_tag(key)
-            field_name = self._field_tag_identifiers[key][1]
-            tag.set("name", field_name)
-            return tag
-
         # If key is in field hierarchy, get it or create it
         if key in self._tag_hierarchy:
             return self._get_or_create_tag(key)
@@ -215,18 +205,6 @@ class XML(object):
                          ".".format(key, parent_tag))
             attribute = parent_tag.get(key)
             return attribute
-
-        elif key == "field_tag_names":
-            return self.select_element.findall("field")
-
-        # If key refers to field attribute, return that tag's value text
-        if key in self._field_tag_names:
-            value_tag, attribute_text = self._field_tag_names[key]
-            logging.info("{} is a field tag attribute with attribute text "
-                         "{}. ".format(key, attribute_text))
-            logging.info("Its value is stored in tag "
-                         "{}.".format(value_tag))
-            return self._get_or_create_tag(value_tag).text
 
         raise AttributeError(err_str)
 
