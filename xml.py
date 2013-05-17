@@ -60,7 +60,7 @@ class XML:
     _unique_tag_attributes = None
     _tag_hierarchy = None
 
-    def get_or_create_tag(self, tag_name):
+    def _get_or_create_tag(self, tag_name):
         """
         Get or create an tag.
 
@@ -105,7 +105,7 @@ class XML:
         # If not, create and retrieve parent
         except KeyError:
             logging.info("KeyError. Making parent {}.".format(parent_name))
-            self.__dict__[parent_name] = self.get_or_create_tag(parent_name)
+            self.__dict__[parent_name] = self._get_or_create_tag(parent_name)
             parent = self.__dict__[parent_name]
         # Check if element exists
         child_name = self._tag_hierarchy[tag_name][1]
@@ -192,23 +192,23 @@ class XML:
         err_str = "SkyQuery instance has no attribute '{}'".format(key)
 
         if key == "reference_date":
-            return self.get_or_create_tag("reference_date_value").text
+            return self._get_or_create_tag("reference_date_value").text
 
         # If key is field tag, set the name
         if key in self._field_tag_identifiers:
-            tag = self.get_or_create_tag(key)
+            tag = self._get_or_create_tag(key)
             field_name = self._field_tag_identifiers[key][1]
             tag.set("name", field_name)
             return tag
 
         # If key is in field hierarchy, get it or create it
         if key in self._tag_hierarchy:
-            return self.get_or_create_tag(key)
+            return self._get_or_create_tag(key)
 
         # If key is attribute, get attribute value
         if key in self._unique_tag_attributes:
             tag_name = self._unique_tag_attributes[key][0]
-            parent_tag = self.get_or_create_tag(tag_name)
+            parent_tag = self._get_or_create_tag(tag_name)
             logging.info("{} is a tag attribute that belongs to tag {}"
                          ".".format(key, parent_tag))
             attribute = parent_tag.get(key)
@@ -224,7 +224,7 @@ class XML:
                          "{}. ".format(key, attribute_text))
             logging.info("Its value is stored in tag "
                          "{}.".format(value_tag))
-            return self.get_or_create_tag(value_tag).text
+            return self._get_or_create_tag(value_tag).text
 
         raise AttributeError(err_str)
 
@@ -254,7 +254,7 @@ class XML:
             """
             field_element = self.find_field_tag(name)
             if field_element is not None:
-                self.get_or_create_tag(field_element,
+                self._get_or_create_tag(field_element,
                                        "value").text = value
             else:
                 etree.SubElement(self.select_element, "field").set("name",
@@ -266,7 +266,7 @@ class XML:
             tag_name = self._unique_tag_attributes[name][0]
             logging.info("{} is an attribute of {} tag.".format(name,
                                                                 tag_name))
-            tag = self.get_or_create_tag(tag_name)
+            tag = self._get_or_create_tag(tag_name)
             tag.set(self._unique_tag_attributes[name][1], value)
 
         # This is setting the field's value, rather than setting the value of
@@ -277,7 +277,7 @@ class XML:
             logging.info("{} is a field tag with tag name "
                          "{}.".format(name,
                                       value_tag))
-            value_tag = self.get_or_create_tag(value_tag)
+            value_tag = self._get_or_create_tag(value_tag)
             logging.info("Value tag is {}. "
                          "Setting value to {}.".format(value_tag,
                                                        value))
