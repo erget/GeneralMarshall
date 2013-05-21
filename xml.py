@@ -128,48 +128,14 @@ class XML(object):
         @type name: String
         @param value: Value to be assigned
         """
-        def set_field_element_text(name, value):
-            """Sets field element text to value
 
-            @param name: The field element whose text is to be set
-            @type name: String
-            @param value: The text value to be entered for the field
-            @type value: String
-            """
-            field_element = self.find_field_tag(name)
-            if field_element is not None:
-                self._get_or_create_tag(field_element,
-                                       "value").text = value
-            else:
-                etree.SubElement(self.select_element, "field").set("name",
-                                                                   name)
-                set_field_element_text(name, value)
-
-        # name should be a tag attribute
+        # name is a tag attribute
         if name in self._unique_tag_attributes:
             tag_name = self._unique_tag_attributes[name][0]
             logging.info("{} is an attribute of {} tag.".format(name,
                                                                 tag_name))
             tag = self._get_or_create_tag(tag_name)
             tag.set(self._unique_tag_attributes[name][1], value)
-
-        # This is setting the field's value, rather than setting the value of
-        # the value tag beneath the field.
-        # Name is a field tag
-        if name in self._field_tag_names:
-            value_tag = self._field_tag_names[name][0]
-            logging.info("{} is a field tag with tag name "
-                         "{}.".format(name,
-                                      value_tag))
-            value_tag = self._get_or_create_tag(value_tag)
-            logging.info("Value tag is {}. "
-                         "Setting value to {}.".format(value_tag,
-                                                       value))
-            value_tag.text = value
-#             set_field_element_text(self.field_tag_names[name], value)
-
-        if name == "reference_date":
-            self.reference_date_value.text = value
         else:
             self.__dict__[name] = value
 
