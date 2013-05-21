@@ -233,6 +233,3 @@ class XML(object):
 
         with open(path, "w") as output_file:
             output_file.write(str(self))
-
-# Show log info messages if desired
-logging.basicConfig(format="%(message)s", level=logging.INFO)
