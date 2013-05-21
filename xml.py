@@ -186,8 +186,8 @@ class XML(object):
         elements = parent.getchildren()
         element = None
 
-        # If children are found and element child element is not found field
-        if elements and child_name != "field":
+        # If children are found
+        if elements:
             logging.info("{} has children: {}. ".format(parent, elements))
             # Check if I can find the element the easy way
             element = parent.find(child_name)
@@ -207,12 +207,7 @@ class XML(object):
             return element
 
         # Otherwise create it
-        element_name = self._tag_hierarchy[tag_name][1]
-        logging.info("Creating {} as {}.".format(tag_name, element_name))
         tag = etree.SubElement(parent, child_name)
-        # If it's a field element, set its name
-        if child_name == "field":
-            tag.set("name", self._field_tag_attribute_map[tag_name])
         return tag
 
     def export(self, path):
