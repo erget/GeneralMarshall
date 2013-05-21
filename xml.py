@@ -97,7 +97,6 @@ class XML(object):
         Getters are used here in order to ensure that the simple fields exposed
         to the user are synchronized with the internally stored XML elements
         """
-
         _attribute_error_string = ("{} instance has no attribute "
                               "'{}'".format(self.__class__.__name__, key))
 
@@ -107,11 +106,12 @@ class XML(object):
 
         # If key is attribute, get attribute value
         if key in self._unique_tag_attributes:
+            logging.info("Key {} is a unique tag attribute.".format(key))
             tag_name = self._unique_tag_attributes[key][0]
             parent_tag = self._get_or_create_tag(tag_name)
             logging.info("{} is a tag attribute that belongs to tag {}"
                          ".".format(key, parent_tag))
-            attribute = parent_tag.get(key)
+            attribute = parent_tag.get(self._unique_tag_attributes[key][1])
             return attribute
 
         raise AttributeError(_attribute_error_string)
@@ -188,8 +188,7 @@ class XML(object):
 
         # If children are found and element child element is not found field
         if elements and child_name != "field":
-            logging.info("{} has children: {}. "
-                         "element={}".format(parent, elements, element))
+            logging.info("{} has children: {}. ".format(parent, elements))
             # Check if I can find the element the easy way
             element = parent.find(child_name)
             if element is not None:
