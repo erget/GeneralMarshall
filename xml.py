@@ -77,6 +77,8 @@ class XML(object):
 
     def __str__(self):
         """
+        Return marshalled representation of object.
+
         The query string has to use single quotation marks in the first line,
         otherwise the parser used in SKY rejects it.
         """
@@ -94,6 +96,8 @@ class XML(object):
 
     def __getattr__(self, key):
         """
+        Look up requested field in hierarchy, or creating tags if necessary.
+
         Getters are used here in order to ensure that the simple fields exposed
         to the user are synchronized with the internally stored XML elements
         """
@@ -106,11 +110,11 @@ class XML(object):
 
         # If key is attribute, get attribute value
         if key in self._unique_tag_attributes:
-            logging.info("Key {} is a unique tag attribute.".format(key))
+            logging.debug("Key {} is a unique tag attribute.".format(key))
             tag_name = self._unique_tag_attributes[key][0]
             parent_tag = self._get_or_create_tag(tag_name)
-            logging.info("{} is a tag attribute that belongs to tag {}"
-                         ".".format(key, parent_tag))
+            logging.debug("{} is a tag attribute that belongs to tag {}"
+                          ".".format(key, parent_tag))
             attribute = parent_tag.get(self._unique_tag_attributes[key][1])
             return attribute
 
@@ -118,6 +122,8 @@ class XML(object):
 
     def __setattr__(self, name, value):
         """
+        Set tag or attribute according to hierarchy, or set normal field.
+
         Setters are used for the same reason as the getters - to ensure that
         what the user sets is reflected in the object's internal XML elements
 
@@ -132,8 +138,8 @@ class XML(object):
         # name is a tag attribute
         if name in self._unique_tag_attributes:
             tag_name = self._unique_tag_attributes[name][0]
-            logging.info("{} is an attribute of {} tag.".format(name,
-                                                                tag_name))
+            logging.debug("{} is an attribute of {} tag.".format(name,
+                                                                 tag_name))
             tag = self._get_or_create_tag(tag_name)
             tag.set(self._unique_tag_attributes[name][1], value)
         else:
@@ -154,21 +160,22 @@ class XML(object):
             parent_name = self._tag_hierarchy[tag_name][0]
         except KeyError:
             _attribute_error_string = ("{} instance has no attribute "
-                              "'{}'".format(self.__class__.__name__, tag_name))
+                                       "'{}'".format(self.__class__.__name__,
+                                                     tag_name))
             raise AttributeError(_attribute_error_string)
         # Does parent exist?
         try:
-            logging.info("Looking for {}'s parent.".format(tag_name))
+            logging.debug("Looking for {}'s parent.".format(tag_name))
             parent = self.__dict__[parent_name]
         # If not, create and retrieve parent
         except KeyError:
-            logging.info("KeyError. Making parent {}.".format(parent_name))
+            logging.debug("KeyError. Making parent {}.".format(parent_name))
             self.__dict__[parent_name] = self._get_or_create_tag(parent_name)
             parent = self.__dict__[parent_name]
         # Check if element exists
         child_name = self._tag_hierarchy[tag_name][1]
-        logging.info("Parent {} exists. {}'s XML name is {}.".
-                     format(parent, tag_name, child_name))
+        logging.debug("Parent {} exists. {}'s XML name is {}.".
+                      format(parent, tag_name, child_name))
         return parent, child_name
 
     def _get_or_create_tag(self, tag_name):
@@ -188,22 +195,22 @@ class XML(object):
 
         # If children are found
         if elements:
-            logging.info("{} has children: {}. ".format(parent, elements))
+            logging.debug("{} has children: {}. ".format(parent, elements))
             # Check if I can find the element the easy way
             element = parent.find(child_name)
             if element is not None:
-                logging.info("Found tag the easy way. "
-                             "It's {}.".format(element))
+                logging.debug("Found tag the easy way. "
+                              "It's {}.".format(element))
                 return element
             # Otherwise search for it with full namespace
             else:
                 element = parent.find("{ns}{element}".
                                       format(ns=self.ns, element=child_name))
-                logging.info("Found tag with namespace. "
-                             "It's {}.".format(element))
+                logging.debug("Found tag with namespace. "
+                              "It's {}.".format(element))
         # If I found the element, return it
         if element is not None:
-            logging.info("Found tag. It's {}.".format(element))
+            logging.debug("Found tag. It's {}.".format(element))
             return element
 
         # Otherwise create it
@@ -211,7 +218,8 @@ class XML(object):
         return tag
 
     def export(self, path):
-        """Writes query to XML file
+        """
+        Write query to XML file.
 
         @param path: An output path
         """
