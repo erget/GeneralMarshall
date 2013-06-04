@@ -72,7 +72,6 @@ class XML(object):
             self.root = etree.Element(self._root_name,
                                       nsmap={None: self._namespace})
             self.tree = etree.ElementTree(self.root)
-            self.reference_date = ""
         self.ns = "{" + self.root.nsmap[None] + "}"
 
     def __str__(self):
