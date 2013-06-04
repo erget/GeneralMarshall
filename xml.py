@@ -58,7 +58,7 @@ class XML(object):
     _namespace = None
     _root_name = None
     _unique_tags = None
-    _unique_tag_attributes = None
+    _unique_tag_attributes = []
     _tag_hierarchy = None
 
     def __init__(self, xml=""):
