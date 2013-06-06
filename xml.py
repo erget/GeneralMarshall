@@ -134,13 +134,15 @@ class XML(object):
         @param value: Value to be assigned
         """
 
-        # name is a tag attribute
         if name in self._unique_tag_attributes:
             tag_name = self._unique_tag_attributes[name][0]
             logging.debug("{} is an attribute of {} tag.".format(name,
                                                                  tag_name))
             tag = self._get_or_create_tag(tag_name)
             tag.set(self._unique_tag_attributes[name][1], value)
+        elif name in self._unique_tags:
+            tag = self._get_or_create_tag(name)
+            tag.text = value
         else:
             self.__dict__[name] = value
 
