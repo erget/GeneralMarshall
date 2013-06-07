@@ -105,7 +105,11 @@ class XML(object):
 
         # If key is in field hierarchy, get it or create it
         if key in self._tag_hierarchy:
-            return self._get_or_create_tag(key)
+            tag = self._get_or_create_tag(key)
+            if tag.text:
+                return tag.text
+            else:
+                return tag
 
         # If key is attribute, get attribute value
         if key in self._unique_tag_attributes:
