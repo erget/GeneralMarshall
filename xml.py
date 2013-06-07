@@ -34,13 +34,13 @@ class XML(object):
         _tag_hierarchy: A tag hierarchy organized as a dictionary. This is used
                         to place tags when they are generated. It is also used
                         to dynamically generate parent elements that may not
-                        exist when creating child elements.
+                        exist when creating child elements. The tag_identifier
+                        and xml_tagname *can* be different, but they do not
+                        have to. This is to allow client code to use different
+                        identifiers in the Python code than what is shown in
+                        the marshalled XML.
                         Organized thusly:
                             {tag_identifier: (parent, xml_tagname)}
-                        Note:
-                        After describing the field tags, this dictionary is
-                        updated to contain the hierarchy of field tags, which
-                        are all children of the unique select tag.
 
     Methods:
         __init__: Either read a given XML file or create a root XML tag and
@@ -95,7 +95,9 @@ class XML(object):
 
     def __getattr__(self, key):
         """
-        Look up requested field in hierarchy, or creating tags if necessary.
+        Look up requested key in hierarchy, creating tags if necessary.
+
+        If tag has text, return the text. Otherwise return the tag itself.
 
         Getters are used here in order to ensure that the simple fields exposed
         to the user are synchronized with the internally stored XML elements
@@ -127,11 +129,10 @@ class XML(object):
         """
         Set tag or attribute according to hierarchy, or set normal field.
 
-        Setters are used for the same reason as the getters - to ensure that
-        what the user sets is reflected in the object's internal XML elements
+        If name is a unique tag attribute, the tag's attribute is set to the
+        given value.
 
-        If field is known as a special case, it is assigned using the setter.
-        Otherwise it is assigned normally as an object field.
+        If name is a a unique tag, the tag's text is set to the given value.
 
         @param name: Name of attribute to be set
         @type name: String
