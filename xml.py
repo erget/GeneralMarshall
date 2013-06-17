@@ -78,8 +78,8 @@ class XML(object):
         """
         Return marshalled representation of object.
 
-        The query string has to use single quotation marks in the first line,
-        otherwise the parser used in SKY rejects it.
+        The query string uses single quotation marks in the first line,
+        otherwise some parsers reject it.
         """
         string = etree.tostring(self.root,
                                 xml_declaration=True,
@@ -224,11 +224,7 @@ class XML(object):
         return tag
 
     def export(self, path):
-        """
-        Write query to XML file.
-
-        @param path: An output path
-        """
+        """Write query to XML file."""
 
         if os.path.isfile(path):
             overwrite = ""
