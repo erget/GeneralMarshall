@@ -69,10 +69,9 @@ class XML(object):
             self.root = self.tree.getroot()
         else:
             self.source_file = ""
-            self.root = etree.Element(self._root_name,
-                                      nsmap={None: self._namespace})
+            self.root = etree.Element(self._root_name)
             self.tree = etree.ElementTree(self.root)
-        self.ns = "{" + self.root.nsmap[None] + "}"
+        self.ns = "{" + self._namespace + "}"
 
     def __str__(self):
         """
@@ -82,12 +81,13 @@ class XML(object):
         otherwise some parsers reject it.
         """
         string = etree.tostring(self.root,
-                                xml_declaration=True,
-                                encoding="UTF-8",
-                                pretty_print=True,
-                                standalone=True)
-        lines = string.splitlines()
-        lines[0] = (lines[0].replace("'", '"'))
+                                encoding="UTF-8")
+        import xml.dom.minidom
+        pretty_string = xml.dom.minidom.parseString(
+                                            string).toprettyxml(indent="  ")
+        lines = pretty_string.splitlines()[1:]
+        lines.insert(0, '<?xml version="1.0" encoding="UTF-8" '
+                     'standalone="yes"?>')
         return "\n".join(lines)
 
     def __repr__(self):
