@@ -86,9 +86,21 @@ class XML(object):
         pretty_string = xml.dom.minidom.parseString(
                                             string).toprettyxml(indent="  ")
         lines = pretty_string.splitlines()[1:]
-        lines.insert(0, '<?xml version="1.0" encoding="UTF-8" '
-                     'standalone="yes"?>')
-        return "\n".join(lines)
+        # Prepend XML declaration and root tag
+        output_string = ('<?xml version="1.0" encoding="UTF-8" '
+                          'standalone="yes"?>\n' + lines[0] + "\n")
+        # Remove unnecessary line breaks
+        for line in lines[1:]:
+            # Line has closing tag
+            if line.strip().startswith("</"):
+                output_string += line.lstrip() + "\n"
+                # Line has opening tag
+            elif line.strip().startswith("<"):
+                output_string += line.rstrip()
+            # Line has non-tag content
+            elif line.strip():
+                output_string += line.strip()
+        return output_string
 
     def __repr__(self):
         return 'XML("{}")'.format(self.source_file)
