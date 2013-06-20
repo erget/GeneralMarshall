@@ -7,7 +7,7 @@ Created on 22.04.2013
 from distutils.core import setup
 
 setup(name="GeneralMarshall",
-      version="1.0.0",
+      version="1.0.1",
       description="An XML marshalling and demartialling library",
       author="Daniel Lee",
       author_email="Daniel.Lee@dwd.de",

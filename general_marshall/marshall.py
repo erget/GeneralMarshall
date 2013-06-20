@@ -79,28 +79,31 @@ class XML(object):
 
         The query string uses single quotation marks in the first line,
         otherwise some parsers reject it.
+
+        The prettyprinting is programmed here manually because the builtin
+        ``xml`` library can't prettyprint, and the ``lxml`` library is not
+        always present.
         """
-        string = etree.tostring(self.root,
-                                encoding="UTF-8")
-        import xml.dom.minidom
-        pretty_string = xml.dom.minidom.parseString(
-                                            string).toprettyxml(indent="  ")
-        lines = pretty_string.splitlines()[1:]
-        # Prepend XML declaration and root tag
-        output_string = ('<?xml version="1.0" encoding="UTF-8" '
-                          'standalone="yes"?>\n' + lines[0] + "\n")
-        # Remove unnecessary line breaks
-        for line in lines[1:]:
-            # Line has closing tag
-            if line.strip().startswith("</"):
-                output_string += line.lstrip() + "\n"
-                # Line has opening tag
-            elif line.strip().startswith("<"):
-                output_string += line.rstrip()
-            # Line has non-tag content
-            elif line.strip():
-                output_string += line.strip()
-        return output_string
+        ugly_xml = etree.tostring(self.root, encoding="UTF-8")
+        # Split string on adjacent tags without string in between
+        stringlines = ">\n<".join(ugly_xml.split("><")).split("\n")
+        indent = 0
+        string = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' +
+                  stringlines[0] + "\n")
+
+        for number, line in enumerate(stringlines[1:]):
+            # Line starts with closing tag
+            if line.startswith("</"):
+                indent -= 2
+            # Line opens and closes tag
+            elif ("</" in stringlines[number] and not
+                  stringlines[number].strip().startswith("</")):
+                pass
+            # Line and previous line were opening tags
+            elif not stringlines[number].strip().startswith("</"):
+                indent += 2
+            string += " " * indent + line.strip() + "\n"
+        return string
 
     def __repr__(self):
         return 'XML("{}")'.format(self.source_file)
