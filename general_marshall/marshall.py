@@ -93,7 +93,7 @@ class XML(object):
 
         for number, line in enumerate(stringlines[1:]):
             # Line starts with closing tag
-            if line.startswith("</"):
+            if line.strip().startswith("</"):
                 indent -= 2
             # Line opens and closes tag
             elif ("</" in stringlines[number] and not
