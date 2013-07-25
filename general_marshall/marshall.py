@@ -106,7 +106,7 @@ class XML(object):
         return string
 
     def __repr__(self):
-        return 'XML("{}")'.format(self.source_file)
+        return '{}("{}")'.format(self.__class__.__name__, self.source_file)
 
     def __getattr__(self, key):
         """
