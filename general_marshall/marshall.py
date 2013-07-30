@@ -87,6 +87,9 @@ class XML(object):
         ugly_xml = etree.tostring(self.root, encoding="UTF-8")
         # Split string on adjacent tags without string in between
         stringlines = ">\n<".join(ugly_xml.split("><")).split("\n")
+        # Remove xml version encoding that is inserted if using xml, not lxml
+        if stringlines[0].startswith("<?xml"):
+            stringlines = stringlines[1:]
         indent = 0
         string = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' +
                   stringlines[0] + "\n")
