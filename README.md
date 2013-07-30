@@ -28,20 +28,21 @@ This is done by setting the private class attributes ``_namespace``,
 
 When the subclass knows the possible structure of XML files it should use, the
 interaction can look like this::
-    >>> import general_marshall
-    >>> class MyXML(general_marshall.XML):
-    >>>     ...
-    >>>
-    >>> # Load XML file
-    >>> xml_object = MyXML("file_name.xml")
-    >>> # Print pretty printed XML to stdout
-    >>> print(xml_object)
-    >>> # Create empty XML object
-    >>> new_xml = MyXML()
-    >>> # Set a tag value, creating parent nodes if necessary
-    >>> new_xml.value = "something"
-    >>> # Export to file
-    >>> new_xml.export("output_file.xml")
+
+    import general_marshall
+    class MyXML(general_marshall.XML):
+        ...
+    
+    # Load XML file
+    xml_object = MyXML("file_name.xml")
+    # Print pretty printed XML to stdout
+    print(xml_object)
+    # Create empty XML object
+    new_xml = MyXML()
+    # Set a tag value, creating parent nodes if necessary
+    new_xml.value = "something"
+    # Export to file
+    new_xml.export("output_file.xml")
     
 Although ``lxml`` is used to interface with the XML file that is either read or
 created, not all of the functions that ``GeneralMarshall`` would profit from

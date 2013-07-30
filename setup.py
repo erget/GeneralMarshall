@@ -17,5 +17,5 @@ setup(name="GeneralMarshall",
       license="GNU GPL",
       url="https://github.com/erget/GeneralMarshall",
       packages=["general_marshall"],
-      long_description=open("README").read()
+      long_description=open("README.md").read()
       )
